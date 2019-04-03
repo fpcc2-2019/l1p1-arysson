@@ -1,0 +1,68 @@
+---
+title: "Temperatura JP x CG"
+author: "Árysson"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+library(lubridate)
+library(ggbeeswarm)
+library(scales)
+theme_set(theme_bw())
+```
+
+```{r read}
+climas = read_csv(here::here("data/clima_cg_jp-semanal.csv"), 
+                  col_types = "cTddddii")
+
+glimpse(climas)
+```
+
+```{r}
+anyNA(climas)
+```
+
+## Temperatura
+
+### Quais os meses mais quentes e mais frios? 
+
+```{r}
+temperaturas = climas %>% group_by(cidade, mes) %>% summarize(tmedia=mean(tmedia), tmax=mean(tmax))
+temperaturas %>% ggplot(aes(mes, tmedia, color=cidade)) + geom_line() + scale_x_continuous(breaks = pretty_breaks())
+```
+
+O gráfico acima mostra que a distribuição de temperatura ao longo do ano apresenta um vale ao redor do mês de julho. Assim, os meses entre junho e agosto são os mais frios. Já os mais quentes se concentram entre dezembro e abril.
+
+### Qual foi o São João  mais frio de CG que está nos nossos dados?
+
+```{R}
+junho = climas %>% filter(cidade=="Campina Grande", mes==6) %>% select(ano, tmedia) %>% group_by(ano) %>% summarize(temperatura=mean(tmedia))
+junho %>% arrange(temperatura)
+```
+
+A tabela acima mostra os anos e as respectivas temperaturas médias de junho (mês em que acontece o Maior São João do Mundo) que estão presentes nos dados (a partir de 1995) para a cidade de Campina Grande. Vemos que o mês de junho mais frio registrado foi o de 2004. Assim, pode-se dizer que o São João mais frio de Campina Grande nos últimos anos foi o de 2004.
+
+```{r}
+junho %>% ggplot(aes(ano, temperatura)) + geom_line() + scale_x_continuous(breaks = pretty_breaks())
+```
+
+O gráfico acima mostra a distribuição de temperatura média do mês de junho a partir de 1995, mostrando o vale em 2004 e outros semelhantes próximos, como em 2008 e 2002.
+
+## Chuva
+
+### No geral, onde chove mais?
+
+### A distribuição é diferente em meses específicos? 
+
+```{r}
+chuvas = climas %>% group_by(cidade, mes) %>% summarize(chuva=mean(chuva))
+chuvas %>% ggplot(aes(mes, chuva, color=cidade)) + geom_line() + scale_x_continuous(breaks=pretty_breaks())
+```
+
+A resposta para as duas perguntas anteriores pode ser respondida por esse gráfico. Em João Pessoa claramente chove mais do que em Campina Grande. A distribuição das chuvas ao longo do ano apresenta um pico em torno do mês de junho, e um vale em torno de novembro em ambas as cidades.
