@@ -32,6 +32,35 @@ anyNA(climas)
 
 ### Quais os meses mais quentes e mais frios? 
 
+
+```{r} 
+climas %>% filter(cidade == "Campina Grande") %>%
+    ggplot(aes(x = chuva, y = tmedia)) +
+    geom_point(aes(colour = tmedia)) +
+    scale_colour_gradient2(low = "yellow", mid = "green" , high = "blue", midpoint = 16) +
+    geom_smooth(color = "red",size = .5) +
+    scale_y_continuous(limits = c(20,30), breaks = seq(5,30,5)) +
+    xlab("Quantidade de Chuvas - CG") +  ylab ("Temperatura Média ( ºC )")
+```
+
+```{r}
+temperaturas = climas %>% 
+    group_by(cidade, ano) %>% 
+    summarize(tmedia=mean(tmedia), tmax=mean(tmax)) %>% 
+    filter(between(ano, 1993, 2017))
+temperaturas %>% ggplot(aes(ano, tmedia, color=cidade)) + 
+    geom_line() + 
+    scale_x_continuous(breaks = pretty_breaks()) +
+    geom_smooth()
+```
+
+### Existe alguma tendência de variação de temperatura ao longo dos anos, para as cidades de Campina Grande e João Pessoa?
+Pergunta, porque, como os dados podem responder, visualização, leitura e conclusão sobre o mundo.
+
+A pergunta é interessante porque nos últimos anos se têm dado muita ênfase a aquecimento global e mudanças climáticas. Queremos saber se o clima de fato tem mudado nas duas maiores cidades da Paraíba. Os dados podem oferecer uma resposta porque contém medições...
+
+A partir do gráfico das temperaturas médias anuais ao longo dos anos para Campina Grande e João Pessoa, percebe-se que há uma *leve* tendência de mudança para as duas cidades. No caso de João Pessoa, a temperatura *parece* estar subindo, embora a variação acumulada ao longo dos anos seja pouca: uma fração (quanto?) de grau. No caso de Campina Grande, a temperatura *parece* ter ddescido cerca de 1 grau no período 1993 - 2017, embora haja variações bruscas de ano para ano. Contudo, como não temos métodos quantitativos para tirar conclusões, não dá para afirmar categoricamente que a temperatura de João Pessoa esteja aumentando e a de Campina Grande diminuindo.
+
 ```{r}
 temperaturas = climas %>% group_by(cidade, mes) %>% summarize(tmedia=mean(tmedia), tmax=mean(tmax))
 temperaturas %>% ggplot(aes(mes, tmedia, color=cidade)) + geom_line() + scale_x_continuous(breaks = pretty_breaks())
