@@ -1,6 +1,6 @@
 ---
 title: "Temperatura JP x CG"
-author: "Árysson ##### COLOCAR O RESTANTE AQUI #####"
+author: "Árysson Figueiredo, Antônio Lima e Nailson Cunha"
 output: html_document
 ---
 
@@ -24,47 +24,51 @@ climas = read_csv(here::here("data/clima_cg_jp-semanal.csv"),
 glimpse(climas)
 ```
 
-## Temperatura
-
-### Quais os meses mais quentes e mais frios? 
-
-```{r}
-temperaturas = climas %>% group_by(cidade, mes) %>% summarize(tmedia=mean(tmedia), tmax=mean(tmax))
-temperaturas %>% ggplot(aes(mes, tmedia, color=cidade)) + geom_line() + scale_x_continuous(breaks = pretty_breaks())
-```
-
-O gráfico acima mostra que a distribuição de temperatura ao longo do ano apresenta um vale ao redor do mês de julho. Assim, os meses entre junho e agosto são os mais frios. Já os mais quentes se concentram entre dezembro e abril.
-
-### Qual foi o São João  mais frio de CG que está nos nossos dados?
-
-```{R}
-junho = climas %>% filter(cidade=="Campina Grande", mes==6) %>% select(ano, tmedia) %>% group_by(ano) %>% summarize(temperatura=mean(tmedia))
-junho %>% arrange(temperatura)
-```
-
-A tabela acima mostra os anos e as respectivas temperaturas médias de junho (mês em que acontece o Maior São João do Mundo) que estão presentes nos dados (a partir de 1995) para a cidade de Campina Grande. Vemos que o mês de junho mais frio registrado foi o de 2004. Assim, pode-se dizer que o São João mais frio de Campina Grande nos últimos anos foi o de 2004.
-
-```{r}
-junho %>% ggplot(aes(ano, temperatura)) + geom_line() + scale_x_continuous(breaks = pretty_breaks())
-```
-
-O gráfico acima mostra a distribuição de temperatura média do mês de junho a partir de 1995, mostrando o vale em 2004 e outros semelhantes próximos, como em 2008 e 2002.
-
 ## Chuva
 
 ### No geral, onde chove mais?
 
-### A distribuição é diferente em meses específicos? 
+Desejamos descobrir em qual das cidades chove mais. Os dados contêm a quantidade de chuva (em mm) para cada semana ao longo dos últimos anos. Podemos gerar um box-plot com esses dados:
+
+```{r}
+climas %>%
+    ggplot(mapping = aes(x = cidade, y = chuva)) +
+        geom_boxplot(alpha = .2)
+```
+
+Visivelmente os valores de mediana, 3º quartil e máximos são maiores para João Pessoa. Vamos ver um gráfico de linhas com as precipitações médias em cada mês do ano, para cada cidade:
 
 ```{r}
 chuvas = climas %>% group_by(cidade, mes) %>% summarize(chuva=mean(chuva))
 chuvas %>% ggplot(aes(mes, chuva, color=cidade)) + geom_line() + scale_x_continuous(breaks=pretty_breaks())
 ```
 
-A resposta para as duas perguntas anteriores pode ser respondida por esse gráfico. Em João Pessoa claramente chove mais do que em Campina Grande. A distribuição das chuvas ao longo do ano apresenta um pico em torno do mês de junho, e um vale em torno de novembro em ambas as cidades.
+Claramente, a curva de João Pessoa está acima da de Campina Grande. Isso quer dizer que, no total, em João Pessoa chove mais. Inclusive, o gráfico logo acima indica que essa afirmação é verdade para cada mês do ano, em média.
+
+### A distribuição é diferente em meses específicos? 
+
+Queremos saber as semelhanças e diferenças nos padrões de chuva entre os meses do ano, para cada cidade. Fazendo um plot das medições agrupadas por mês, temos:
+
+```{r}
+climas %>%
+    group_by(mes) %>%
+    ggplot(mapping = aes(x = mes, y = chuva)) +
+        geom_point() + 
+        geom_smooth() +
+        coord_flip() + 
+        facet_wrap(~cidade)
+```
+
+E novamente recorremos ao gráfico de precipitação média por mês do ano:
+
+```{r}
+chuvas = climas %>% group_by(cidade, mes) %>% summarize(chuva=mean(chuva))
+chuvas %>% ggplot(aes(mes, chuva, color=cidade)) + geom_line() + scale_x_continuous(breaks=pretty_breaks())
+```
+
+O padrão que se percebe, para as duas cidades, é que há um crescimento da precipitação de chuvas do início para o meio do ano. Em seguida, uma queda acentuada em direção ao fim de ano. A diferença é que, no caso de João Pessoa, o pico do meio de ano é bastante evidente, enquando no de Campina Grande, é discreto. Isso mostra que, por cidade, o ranking dos meses do ano em relação ao índice de chuvas é semelhante. Porém os valores são diferentes, sendo em João Pessoa os maiores índices. No meio do ano, por exemplo, o crescimento das chuvas é bem mais acentuado do que em Campina Grande.
 
 ## Pergunta extra
-
 
 ### Existe alguma tendência de variação de temperatura ao longo dos anos, para as cidades de Campina Grande e João Pessoa?
 
@@ -86,3 +90,6 @@ temperaturas_anuais %>% ggplot(aes(ano, temperatura, color=cidade)) +
 A partir do gráfico das temperaturas médias anuais ao longo dos anos para Campina Grande e João Pessoa, percebe-se que há uma **leve** tendência de mudança para as duas cidades. No caso de João Pessoa, a temperatura **parece** estar subindo, embora a variação acumulada ao longo dos anos seja pouca: aproximadamente 0.5 ºC. No caso de Campina Grande, a temperatura **parece** ter descido cerca de 1 ºC no período 1993 - 2017, embora haja variações bruscas de ano para ano. Contudo, como não temos métodos quantitativos para tirar conclusões, não podemos afirmar categoricamente que a temperatura de João Pessoa esteja aumentando e a de Campina Grande diminuindo.
 
 Portanto, a temperatura **parece** estar variando ao longo dos anos para as duas cidades, embora essa variação seja pouca e possa haver mudanças bruscas de um ano para o outro. Precisaríamos de mais dados para fazer conclusões mais precisas.
+
+
+
